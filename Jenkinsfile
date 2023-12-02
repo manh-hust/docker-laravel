@@ -18,7 +18,7 @@ pipeline {
             steps {
                 script {
                     // Build Docker image
-                    docker.build(env.IMAGE_NAME)
+                    docker.build(env.IMAGE_NAME, '.docker/php')
 
                     // Authenticate with Docker Hub
                     docker.withRegistry('https://index.docker.io/v1/', 'dockerhub') {
