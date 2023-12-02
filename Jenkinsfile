@@ -34,8 +34,9 @@ pipeline {
                 script {
                     // Your deployment steps here
                     // For example, pull the latest image and run a container
-                    sh "docker pull ${env.IMAGE_NAME}"
-                    sh "docker run -d --name your-container-name -p 80:80 ${env.IMAGE_NAME}"
+                    // sh "docker pull ${env.IMAGE_NAME}"
+                    // sh "docker run -d --name your-container-name -p 80:80 ${env.IMAGE_NAME}"
+                    echo 'Deploying...'
                 }
             }
         }
