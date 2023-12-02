@@ -1,35 +1,43 @@
 pipeline {
-
     agent any
 
-    parameters {
-        choice(name: 'ACTION', choices: ['Build', 'Remove all'], description: 'Pick something')
+    environment {
+        IMAGE_NAME = 'doducmanh3000/jenkins-docker-example'
     }
+
     stages {
-        stage('Building/Deploying') {
-            when{
-                environment name: 'ACTION', value: 'Build'
-            }
+        stage('Checkout') {
             steps {
-                withDockerRegistry(credentialsId: 'dockerhub', url: 'https://index.docker.io/v1/') {
-                    sh 'docker compose up -d --build'
-                    sh 'docker compose push'
+                script {
+                    checkout scm
                 }
             }
         }
-        stage('Removing all') {
-            when{
-                environment name: 'ACTION', value: 'Remove all'
-            }
+
+        stage('Build and Push Docker Image') {
             steps {
-                sh 'docker compose down -v '
+                script {
+                    // Build Docker image
+                    docker.build(env.IMAGE_NAME)
+
+                    // Authenticate with Docker Hub
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub') {
+                        // Push Docker image to Docker Hub
+                        docker.image(env.IMAGE_NAME).push()
+                    }
+                }
             }
         }
-    }
-    post {
-        // Clean after build
-        always {
-            cleanWs()
+
+        stage('Deploy') {
+            steps {
+                script {
+                    // Your deployment steps here
+                    // For example, pull the latest image and run a container
+                    sh "docker pull ${env.IMAGE_NAME}"
+                    sh "docker run -d --name your-container-name -p 80:80 ${env.IMAGE_NAME}"
+                }
+            }
         }
     }
 }
